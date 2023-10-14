@@ -10,6 +10,7 @@ import {
   ClassSerializerInterceptor,
   UseGuards,
   Res,
+  Req,
 } from '@nestjs/common';
 
 import { RegisterUserReqDto } from '../dtos/registerReq.dto';
@@ -19,7 +20,7 @@ import { UserService } from '../services/user.service';
 import { UserEntity } from '../entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from 'src/auth/services/auth.service';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 @Controller('users')
 export class UserController {
   constructor(
@@ -35,7 +36,7 @@ export class UserController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Body() user: LoginUserReqDto, @Res() res: Response) {
-    const TOKEN = await this.authService.issueUserToken(user.email);
+    const TOKEN = await this.userService.loginUser(user.email);
     res
       .cookie('access_token', TOKEN, {
         maxAge: 1000 * 60 * 60 * 24,
@@ -47,9 +48,13 @@ export class UserController {
   }
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
-  @Patch('update/:id')
-  async update(@Param('id', ParseIntPipe) @Body() user: UpdateUserReqDto) {
-    const UPDATEDUSER = await this.userService.updateUser(user);
+  @Patch('update')
+  async update(@Body() user: UpdateUserReqDto, @Req() req: Request) {
+    console.log(req.user['userId']);
+    const UPDATEDUSER = await this.userService.updateUser(
+      user,
+      req.user['userId'],
+    );
     return UPDATEDUSER;
   }
 

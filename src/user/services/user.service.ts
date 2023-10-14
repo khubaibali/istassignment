@@ -4,12 +4,17 @@ import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { RegisterUserReqDto } from '../dtos/registerReq.dto';
 import { withoutPasswords } from '../types/userTypes';
+import { LogEntity, LogType } from 'src/logger/entities/log.entity';
+import { AuthService } from 'src/auth/services/auth.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    @InjectRepository(LogEntity)
+    private readonly logEvent: Repository<LogEntity>,
+    private readonly authService: AuthService,
   ) {}
 
   async findAll(): Promise<UserEntity[]> {
@@ -29,9 +34,27 @@ export class UserService {
     }
   }
 
-  async updateUser(user: Partial<UserEntity>): Promise<Partial<UserEntity>> {
+  async loginUser(email: string): Promise<string> {
     try {
-      return await this.userRepo.save(user);
+      const USER = await this.userExists(email);
+      const access_token = await this.authService.issueUserToken(email);
+      this.logEventDb(LogType.login, USER);
+      return access_token;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async updateUser(
+    user: Partial<UserEntity>,
+    userid: number,
+  ): Promise<Partial<UserEntity>> {
+    try {
+      const USER = this.userExists(user.email);
+      console.log('update', USER);
+      const updateUser = this.userRepo.create({ ...USER, ...user, id: userid });
+      this.logEventDb(LogType.update, updateUser);
+      return await this.userRepo.save(updateUser);
     } catch (error) {
       throw new Error(error.message);
     }
@@ -47,6 +70,7 @@ export class UserService {
       }
       const USERCREATED = this.userRepo.create(user);
       const USERSAVE = await this.userRepo.save(USERCREATED);
+      this.logEventDb(LogType.register, USERSAVE);
       return USERSAVE;
     } catch (error) {
       throw new Error(error.message);
@@ -59,5 +83,25 @@ export class UserService {
       return USER;
     }
     return null;
+  }
+
+  async logEventDb(logType: LogType, user: UserEntity) {
+    console.log('here');
+    let log: LogEntity = null;
+    switch (logType) {
+      case LogType.login:
+        log = this.logEvent.create({ type: LogType.login, user });
+        this.logEvent.save(log);
+        break;
+      case LogType.register:
+        console.log('here2');
+        log = this.logEvent.create({ type: LogType.register, user });
+        this.logEvent.save(log);
+        break;
+      case LogType.update:
+        log = this.logEvent.create({ type: LogType.update, user });
+        this.logEvent.save(log);
+        break;
+    }
   }
 }

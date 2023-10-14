@@ -3,16 +3,10 @@ import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
 export class UpdateUserReqDto {
   @IsString()
   @IsNotEmpty()
-  @Transform((value) => value.toString().trim())
+  @Transform(({ value }) => value.trim())
   fullName: string;
 
   @IsEmail()
-  @IsNotEmpty()
-  @Transform((value) => value.toString().trim())
+  @Transform(({ value }) => value.trim())
   email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Transform((value) => value.toString().trim())
-  password: string;
 }
