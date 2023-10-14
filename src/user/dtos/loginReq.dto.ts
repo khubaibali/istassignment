@@ -4,11 +4,10 @@ import { Transform } from 'class-transformer';
 export class LoginUserReqDto {
   @IsString()
   @IsNotEmpty()
-  @Transform((value) => value.toString().trim())
+  @Transform(({ value }) => value.trim())
   email: string;
 
   @IsString()
   @IsNotEmpty()
-  @Transform((value) => value.toString().trim())
   password: string;
 }

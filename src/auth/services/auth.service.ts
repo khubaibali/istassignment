@@ -12,18 +12,24 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<string> {
+  async validateUser(email: string, password: string): Promise<any> {
+    console.log(email, password);
     const USER = await this.userRepo.findOne({
       where: { email: email, password: password },
     });
+    console.log('found user', USER);
     if (!USER) {
       throw new NotFoundException('User not found');
     }
-    const ACCESS_TOKEN = this.issueUserToken(USER.id, USER.email);
-    return ACCESS_TOKEN;
+    return USER;
   }
 
-  async issueUserToken(userId: number, email: string): Promise<string> {
+  async issueUserToken(email: string): Promise<string> {
+    const USER = await this.userRepo.findOne({
+      where: { email: email },
+    });
+    console.log(USER);
+    const userId = USER.id;
     const payload = { userId, email };
     const accessToken = await this.jwtService.signAsync(payload);
     return accessToken;
