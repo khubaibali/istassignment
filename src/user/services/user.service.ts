@@ -12,11 +12,12 @@ export class UserService {
     private readonly userRepo: Repository<UserEntity>,
   ) {}
 
-  async findAll(): Promise<UserEntity[] | Error> {
+  async findAll(): Promise<UserEntity[]> {
     try {
-      return await this.userRepo.find();
+      const users = await this.userRepo.find();
+      return users;
     } catch (error) {
-      return new Error(error.message);
+      throw new Error(error.message);
     }
   }
 
@@ -28,13 +29,11 @@ export class UserService {
     }
   }
 
-  async updateUser(
-    user: Partial<UserEntity>,
-  ): Promise<Partial<UserEntity | Error>> {
+  async updateUser(user: Partial<UserEntity>): Promise<Partial<UserEntity>> {
     try {
       return await this.userRepo.save(user);
     } catch (error) {
-      return new Error(error.message);
+      throw new Error(error.message);
     }
   }
 
@@ -50,7 +49,7 @@ export class UserService {
       const USERSAVE = await this.userRepo.save(USERCREATED);
       return USERSAVE;
     } catch (error) {
-      return new Error(error.message);
+      throw new Error(error.message);
     }
   }
 

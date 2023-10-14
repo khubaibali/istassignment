@@ -4,7 +4,7 @@ import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
 export class RegisterUserReqDto {
   @IsString()
   @IsNotEmpty()
-  @Transform((value) => value.toString().trim())
+  @Transform(({ value }) => value.trim())
   fullName: string;
 
   @IsEmail()
@@ -12,6 +12,6 @@ export class RegisterUserReqDto {
 
   @IsString()
   @IsNotEmpty()
-  @Transform((value) => value.toString().trim())
+  @Transform(({ value }) => value.toString().trim())
   password: string;
 }

@@ -4,7 +4,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
+import { Exclude } from 'class-transformer';
 @Entity()
 export class UserEntity {
   @PrimaryGeneratedColumn()
@@ -16,11 +16,12 @@ export class UserEntity {
   @Column()
   fullName: string;
 
+  @Exclude()
   @Column()
   password: string;
 
-//   @OneToMany(() => LogEntity, (log) => log.user)
-//   Logs: LogEntity;
+  //   @OneToMany(() => LogEntity, (log) => log.user)
+  //   Logs: LogEntity;
 
   @CreateDateColumn()
   createdAt: Date;
