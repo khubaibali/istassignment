@@ -1,14 +1,25 @@
-import { Body, Controller, Post, Patch, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Patch,
+  Get,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 
 import { RegisterUserReqDto } from '../dtos/registerReq.dto';
 import { LoginUserReqDto } from '../dtos/loginReq.dto';
 import { UpdateUserReqDto } from '../dtos/updateReq.dto';
+import { UserService } from '../services/user.service';
 
 @Controller('users')
 export class UserController {
+  constructor(private readonly userService: UserService) {}
+
   @Post('register')
-  register(@Body() user: RegisterUserReqDto) {
-    return user;
+  async register(@Body() user: RegisterUserReqDto) {
+    return await this.userService.registerUser(user);
   }
 
   @Post('login')
@@ -17,17 +28,18 @@ export class UserController {
   }
 
   @Patch('update/:id')
-  update(@Body() user: UpdateUserReqDto) {
-    return user;
+  async update(@Param('id', ParseIntPipe) @Body() user: UpdateUserReqDto) {
+    const UPDATEDUSER = await this.userService.updateUser(user);
+    return UPDATEDUSER;
   }
 
   @Get(':id')
-  getUser(@Param('id', ParseIntPipe) id: string) {
-    return user;
+  async getUser(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.findOne(id);
   }
 
   @Get()
-  GetAllUsers(@Body() user: RegisterUserReqDto) {
-    return user;
+  async GetAllUsers() {
+    return await this.userService.findAll();
   }
 }
