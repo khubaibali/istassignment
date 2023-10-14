@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   UseInterceptors,
   ClassSerializerInterceptor,
+  UseGuards,
 } from '@nestjs/common';
 
 import { RegisterUserReqDto } from '../dtos/registerReq.dto';
@@ -15,6 +16,7 @@ import { LoginUserReqDto } from '../dtos/loginReq.dto';
 import { UpdateUserReqDto } from '../dtos/updateReq.dto';
 import { UserService } from '../services/user.service';
 import { UserEntity } from '../entities/user.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
 export class UserController {
@@ -25,11 +27,12 @@ export class UserController {
     return await this.userService.registerUser(user);
   }
 
+  @UseGuards(AuthGuard('local'))
   @Post('login')
   login(@Body() user: LoginUserReqDto) {
     return user;
   }
-
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(ClassSerializerInterceptor)
   @Patch('update/:id')
   async update(@Param('id', ParseIntPipe) @Body() user: UpdateUserReqDto) {
