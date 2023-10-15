@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
@@ -102,6 +106,19 @@ export class UserService {
         log = this.logEvent.create({ type: LogType.update, user });
         this.logEvent.save(log);
         break;
+      case LogType.delete:
+        log = this.logEvent.create({ type: LogType.delete, user });
+        this.logEvent.save(log);
+        break;
     }
+  }
+
+  async deleteUser(email: string): Promise<void> {
+    const USER = await this.userExists(email);
+    if (!USER) {
+      throw new NotFoundException('User not found');
+    }
+    this.logEventDb(LogType.delete, USER);
+    await this.userRepo.softRemove(USER);
   }
 }

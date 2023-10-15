@@ -11,6 +11,7 @@ import {
   UseGuards,
   Res,
   Req,
+  Delete,
 } from '@nestjs/common';
 
 import { RegisterUserReqDto } from '../dtos/registerReq.dto';
@@ -56,6 +57,13 @@ export class UserController {
       req.user['userId'],
     );
     return UPDATEDUSER;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('delete')
+  async delete(@Req() req: Request) {
+    console.log(req.user['email']);
+    return await this.userService.deleteUser(req.user['email']);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
