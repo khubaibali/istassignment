@@ -41,6 +41,9 @@ export class UserService {
   async loginUser(email: string): Promise<string> {
     try {
       const USER = await this.userExists(email);
+      if (!USER) {
+        throw new NotFoundException('User not found');
+      }
       const access_token = await this.authService.issueUserToken(email);
       this.logEventDb(LogType.login, USER);
       return access_token;
@@ -55,7 +58,9 @@ export class UserService {
   ): Promise<Partial<UserEntity>> {
     try {
       const USER = this.userExists(user.email);
-      console.log('update', USER);
+      if (!USER) {
+        throw new NotFoundException('User not found');
+      }
       const updateUser = this.userRepo.create({ ...USER, ...user, id: userid });
       this.logEventDb(LogType.update, updateUser);
       return await this.userRepo.save(updateUser);
